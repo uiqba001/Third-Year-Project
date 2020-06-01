@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Your {% if is_budget %} Budgets {% else %} Savings Pots {% endif %}</h1>
+</div>
+
+<div class="row">
+    <div class="col-4">
+
+        <h2 class="h4 mb-0 text-gray-800">Recent {% if is_budget %} Budget {% else %} Savings Pot {% endif %}
+            Actions</h2>
+
+
+        {% for action in recent_pot_actions %}
+
+        <div class="row">
+            <div class="col">
+                <div class="card shadow mb-4 mt-3">
+                    <div class="card-header py-3">
+                        {% if 'SPENT' in action.action_type or 'SAVED' in action.action_type %}
+                        <h6 class="m-0 font-weight-bold text-success"> {{ action.action_type }} </h6>
+                        {% elif 'CREATED' in action.action_type%}
+                        <h6 class="m-0 font-weight-bold text-primary"> {{ action.action_type }} </h6>
+                        {% elif 'REMOVED' in action.action_type%}
+                        <h6 class="m-0 font-weight-bold text-danger"> {{ action.action_type }} </h6>
+                        {% elif 'DELETED' in action.action_type%}
+                        <h6 class="m-0 font-weight-bold text-danger"> {{ action.action_type }} </h6>
+                        {% else %}
+                        <h6 class="m-0 font-weight-bold text-primary"> {{ action.action_type }} </h6>
+                        {% endif %}
+
+                    </div>
+                    <div class="card-body">
+                        {{ action.action_value }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+    <div class="col-8">
+        {% if pots|length == 0 %}
+        <div class="alert alert-primary" role="alert">
+            You don't currently have any {% if is_budget %} budgets {% else %} savings pots {% endif %} -
+            Click <a
+                href="{% if is_budget %}{{ url_for('create_budget') }} {% else %} {{ url_for('create_savings_pot') }} {% endif %}">here</a>
+            to create one
+        </div>
+
+        {% else %}
+        {% for pot in pots %}
+        <div class="row">
+            <div class="col">
+                <!-- Dropdown Card Example -->
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary"> {{ pot.name }} </h6>
+                        <div class="dropdown no-arrow">
+                            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                 aria-labelledby="dropdownMenuLink">
+                                <div class="dropdown-header">Dropdown Header:</div>
+                                <button class="dropdown-item" data-toggle="modal" data-target="#edit{{ pot.pot_id }}"
+                                        type="button">
+                                    <i class="far fa-edit"></i>
+                                    Edit
+                                </button>
+                                <button class="dropdown-item" data-toggle="modal"
+                                        data-target="#add-money{{ pot.pot_id }}"
+                                        type="button">
+                                    <i class="fas fa-plus"></i> Add money {% if is_budget %} spent {% else %} saved
+                                    {%
+                                    endif %}
+                                </button>
+                                <button class="dropdown-item" data-toggle="modal"
+                                        data-target="#remove-money{{ pot.pot_id }}"
+                                        type="button">
+                                    <i class="fas fa-minus"></i> Remove money {% if is_budget %} spent {% else %} saved
+                                    {%
+                                    endif %}
+                                </button>
+
+
+                                <div class="dropdown-divider"></div>
+                                <button class="dropdown-item" data-toggle="modal"
+                                        data-target="#delete{{ pot.pot_id }}"
+                                        type="button">
+                                    <i class="far fa-trash-alt"></i>
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        {{ pot.total_amount }} / {{ pot.target }}
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+
+        <!--Edit Modal -->
+        <div class="modal fade" id="edit{{ pot.pot_id }}" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <form class="user validation-form" method="POST">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Budget</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+
+                            <input type="hidden" name="pot_id" value="{{ pot.pot_id }}">
+                            <div class="form-group">
+                                <label for="inputPotName{{ pot.pot_id }}">{% if is_budget %} Budget {% else %} Savings
+                                    Pot
+                                    {% endif %} Name</label>
+                                <input type="text" class="form-control" name="pot_name"
+                                       id="inputPotName{{ pot.pot_id }}" value="{{ pot.name }}"
+                                       placeholder="Enter {% if is_budget %} budget {% else %} savings pot {% endif %} name"
+                                       required>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPotAmount{{ pot.pot_id }}">{% if is_budget %} Budget {% else %} Savings
+                                    Pot
+                                    {% endif %} Amount</label>
+                                <input type="text" class="form-control" name="pot_amount"
+                                       id="inputPotAmount{{ pot.pot_id }}" value="{{ pot.target }}"
+                                       placeholder="Enter {% if is_budget %} budget {% else %} savings pot {% endif %} amount"
+                                       required>
+                            </div>
+
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success btn-user form-button" name="submit_type"
+                                    value="edit">Save changes
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-user" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!--Remove money Modal -->
+        <div class="modal fade" id="remove-money{{ pot.pot_id }}" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <form class="user validation-form" method="POST">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Remove money {% if is_budget %} spent {% else %} saved {% endif
+                                %}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+
+                            <input type="hidden" name="pot_id" value="{{ pot.pot_id }}">
+                            <div class="form-group">
+                                <label for="removeAmountSpent{{ pot.pot_id }}">Remove {% if is_budget %} spent {% else
+                                    %}
+                                    saved {% endif %}</label>
+                                <input type="text" class="form-control" name="amount_decreased"
+                                       id="removeAmountSpent{{ pot.pot_id }}"
+                                       placeholder="Enter amount to remove" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success btn-user form-button" name="submit_type"
+                                    value="remove_money">Save changes
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-user" data-dismiss="modal">Close</button>
+
+                        </div>
+
+
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!--Add money Modal -->
+        <div class="modal fade" id="add-money{{ pot.pot_id }}" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <form class="user validation-form" method="POST">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add money {% if is_budget %} spent {% else %} saved {% endif %}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+
+                            <input type="hidden" name="pot_id" value="{{ pot.pot_id }}">
+                            <div class="form-group">
+                                <label for="inputAmountSpent{{ pot.pot_id }}">Amount {% if is_budget %} spent {% else %}
+                                    saved {% endif %}</label>
+                                <input type="text" class="form-control" name="amount_increased" required
+                                       id="inputAmountSpent{{ pot.pot_id }}"
+                                       placeholder="Enter amount {% if is_budget %} spent {% else %} saved {% endif %}">
+                            </div>
+
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success btn-user form-button" name="submit_type"
+                                    value="add_money">Save changes
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-user" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!--Delete Modal -->
+        <div class="modal fade" id="delete{{ pot.pot_id }}" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <form class="user" method="POST">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Delete {% if is_budget %} budget {% else %} savings pot {% endif
+                                %}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+
+                            <p>Are you sure you want to delete this {% if is_budget %} budget {% else %} savings pot
+                                {%
+                                endif %}?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" name="pot_id" value="{{ pot.pot_id }}">
+                            <button type="submit" class="btn btn-danger btn-user" name="submit_type"
+                                    value="delete">Delete
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-user" data-dismiss="modal">Close</button>
+
+                        </div>
+
+
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% endfor %}
+        {% endif %}
+    </div>
+
+</div>
+
+
+{% endblock %}

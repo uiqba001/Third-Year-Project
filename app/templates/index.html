@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+
+</div>
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h2 class="h4 mb-0 text-gray-800">Overview</h2>
+</div>
+
+<div class="row">
+
+    <!-- Number of budgets -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">No. of budgets</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_number_of_budgets }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-wallet fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Number of savings pots -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">No. of Savings Pots</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"> {{ total_number_of_savings_pots }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-coins fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total budget allocations -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Budget Allocations</div>
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-auto">
+                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"> &pound;{{
+                                    total_budget_allocations }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-wallet fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total saved -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Amount Saved</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"> &pound;{{ total_saved }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-coins fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h2 class="h4 mb-0 text-gray-800">Your budgets</h2>
+</div>
+<div class="row">
+    {% if budgets|length == 0 %}
+    <div class="alert alert-primary" role="alert">
+        You don't currently have any budgets -
+        Click <a
+            href="{{ url_for('create_budget') }}">here</a>
+        to create one
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+
+        <!-- Budgets spending -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Budget Spendings</h6>
+            </div>
+            <div class="card-body">
+                {% for info in budget_pie_chart_info %}
+
+                <h4 class="small font-weight-bold"> {{ info.label }} <span
+                        class="float-right"> {{ info.percentage }}%</span></h4>
+                <div class="progress mb-4">
+                    <div class="progress-bar" role="progressbar"
+                         style="width: {{ info.percentage }}%; background-color: {{ info.colour }}"
+                         aria-valuenow=" {{info.percentage }}"
+                         aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+    {% if budgets|length > 0 %}
+    <!-- Pie Chart -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card shadow mb-4">
+            <!-- Card Header - Dropdown -->
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Averages of Budgets</h6>
+            </div>
+            <!-- Card Body -->
+            <div class="card-body">
+                <div class="chart-pie pt-4 pb-2">
+                    <canvas id="budgetsPieChart"></canvas>
+                </div>
+                <div class="mt-4 text-center small">
+                    {% for info in budget_pie_chart_info %}
+                    <span class="mr-2">
+                      <i class="fas fa-circle" style="color: {{ info.colour }}"></i> {{ info.label }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h2 class="h4 mb-0 text-gray-800">Your Savings Pots</h2>
+</div>
+<div class="row">
+    {% if pots|length == 0 %}
+    <div class="alert alert-primary" role="alert">
+        You don't currently have any savings pots -
+        Click <a
+            href="{{ url_for('create_savings_pot') }}">here</a>
+        to create one
+    </div>
+
+    {% endif %}
+
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+
+        <!-- Savings pots information -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Savings in Savings Pots</h6>
+            </div>
+            <div class="card-body">
+                {% for info in savings_pie_chart_info %}
+
+                <h4 class="small font-weight-bold"> {{ info.label }} <span
+                        class="float-right"> {{ info.percentage }}%</span></h4>
+                <div class="progress mb-4">
+                    <div class="progress-bar" role="progressbar"
+                         style="width: {{ info.percentage }}%; background-color: {{ info.colour }}"
+                         aria-valuenow=" {{info.percentage }}"
+                         aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+    {% if pots|length > 0 %}
+    <div class="col-xl-4 col-lg-5">
+        <div class="card shadow mb-4">
+            <!-- Card Header - Dropdown -->
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Averages of Savings Pots</h6>
+            </div>
+            <!-- Card Body -->
+            <div class="card-body">
+                <div class="chart-pie pt-4 pb-2">
+                    <canvas id="savingsPieChart"></canvas>
+                </div>
+                <div class="mt-4 text-center small">
+                    {% for info in savings_pie_chart_info %}
+                    <span class="mr-2">
+                      <i class="fas fa-circle" style="color: {{ info.colour }}"></i> {{ info.label }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+<div class="row">
+</div>
+
+<script src="{{ url_for('static',filename='js/chart.js/chart.min.js') }}"></script>
+<script>
+
+
+// Set new default font family and font color to mimic Bootstrap's default styling
+Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+Chart.defaults.global.defaultFontColor = '#858796';
+
+//budgets pie chart
+
+{% if budgets|length > 0 %}
+var budgetsData = [];
+var budgetsLabels = [];
+var budgetsColours = [];
+
+{% for info in budget_pie_chart_info %}
+          budgetsData.push( {{ info.value }} );
+          budgetsLabels.push( "{{ info.label }}" );
+          budgetsColours.push( "{{ info.colour }}" );
+{% endfor %}
+createChart(budgetsData, budgetsLabels, budgetsColours, "budgetsPieChart");
+{% endif %}
+
+// savings pots pie chart
+
+{% if pots|length > 0 %}
+var savingsData = [];
+var savingsLabels = [];
+var savingsColours = [];
+
+{% for info in savings_pie_chart_info %}
+          savingsData.push( {{ info.value }} );
+          savingsLabels.push( "{{ info.label }}" );
+          savingsColours.push( "{{ info.colour }}" );
+{% endfor %}
+createChart(savingsData, savingsLabels, savingsColours, "savingsPieChart");
+{% endif %}
+
+function createChart(data, labels, colours, id){
+
+var ctx = document.getElementById(id);
+var pieChart = new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: labels,
+    datasets: [{
+      data: data,
+      backgroundColor: colours,
+      hoverBackgroundColor: colours,
+      hoverBorderColor: "rgba(234, 236, 244, 1)",
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    tooltips: {
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: false,
+      caretPadding: 10,
+    },
+    legend: {
+      display: false
+    },
+    cutoutPercentage: 80,
+  },
+});
+}
+</script>
+{% endblock %}
+

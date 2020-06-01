@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="col">
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Create a savings pot</h1>
+    </div>
+
+
+    <div class="card card-body">
+        <form class="user validation-form" method="POST">
+            <div class="col-md-6 offset-md-3">
+                <div class="form-group">
+                    <label for="savingsPotName"> Name </label>
+                    <input type="text" class="form-control form-control-user" name="savingsPotName"
+                           id="savingsPotName"
+                           placeholder="Enter savings pot name" required>
+                </div>
+                <div class="form-group">
+                    <label for="savingsPotGoal"> Savings pot goal </label>
+                    <input type="text" class="form-control form-control-user" name="savingsPotGoal"
+                           id="savingsPotGoal"
+                           placeholder="Enter savings pot goal" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-user btn-block form-button" name="submit_type">
+                    Submit
+                </button>
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% endwith %}
+            </div>
+
+        </form>
+    </div>
+
+
+</div>
+
+
+{% endblock %}
